@@ -16,6 +16,48 @@ Play::~Play()
     }
 }
 
+static QString randomWord()
+{
+    QString t;
+    const int size = (rand() % 8) + 3;
+    t.reserve(size);
+    for (int i=0; i<size; ++i) {
+        t += QChar(((int)rand() % 26) + 'a');
+    }
+    return t;
+}
+
+
+Play *Play::createRandomPlay()
+{
+    QStringList names = (QStringList() << "Demarco" << "Dion" << "Chikae" << "Beyonce"
+                         << "Deion" << "Jayla" << "Deon" << "Demond" << "Ayana" << "Elon"
+                         << "Kimani" << "Aisha" << "Tupac" << "Kayla" << "Shaniqua" << "Imani"
+                         << "Cleavon" << "Jazara" << "Kya" << "Malik" << "Zari" << "Elroi"
+                         << "Laqueta" << "Jelani" << "Darius" << "Amir" << "Jahari" );
+    Play *play = new Play;
+    play->name = randomWord();
+    for (int i=0; i<8; ++i) {
+        Character *character = new Character(play);
+        character->name = names.takeAt(rand() % names.size());
+        play->characters.append(character);
+    }
+
+    for (int i=0; i<8; ++i) {
+        Actor *actor = new Actor;
+        actor->name = names.takeAt(rand() % names.size());
+        play->actors.append(actor);
+    }
+
+    for (int i=0; i<8; ++i) {
+        Role *role = new Role(play->characters.at(i), play->actors.at(i));
+        play->roles.append(role);
+    }
+
+    return play;
+}
+
+
 enum { Format = 1, Magic = 0xabbaf00b };
 void Play::save(QIODevice *device) const
 {
@@ -163,4 +205,45 @@ Frame::~Frame()
         event->frame = 0;
         delete event;
     }
+}
+
+PlayModel::PlayModel(QObject *parent)
+    : QAbstractItemModel(parent)
+{
+
+}
+
+void PlayModel::setPlay(Play *play)
+{
+
+}
+
+QModelIndex PlayModel::index(int row, int column, const QModelIndex &parent) const
+{
+
+}
+
+QModelIndex PlayModel::parent(const QModelIndex &child) const
+{
+
+}
+
+int PlayModel::rowCount(const QModelIndex &parent) const
+{
+
+}
+
+int PlayModel::columnCount(const QModelIndex &parent) const
+{
+
+}
+
+QVariant PlayModel::data(const QModelIndex &index, int role ) const
+{
+
+}
+
+bool PlayModel::setData(const QModelIndex &index, const QVariant &value, int role )
+{
+
 }

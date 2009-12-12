@@ -30,6 +30,7 @@ struct Play : public BaseNode
 
     void save(QIODevice *device) const;
     static Play *load(QIODevice *device);
+    static Play *createRandomPlay();
 };
 
 struct Act : public BaseNode
@@ -116,6 +117,22 @@ struct Actor : public BaseNode
 
     // name is a unique id
 };
+
+class PlayModel : public QAbstractItemModel
+{
+    Q_OBJECT
+public:
+    PlayModel(QObject *parent = 0);
+    void setPlay(Play *play);
+    virtual QModelIndex index(int row, int column,
+                              const QModelIndex &parent = QModelIndex()) const;
+    virtual QModelIndex parent(const QModelIndex &child) const;
+    virtual int rowCount(const QModelIndex &parent = QModelIndex()) const;
+    virtual int columnCount(const QModelIndex &parent = QModelIndex()) const;
+    virtual QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
+    virtual bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole);
+};
+
 
 
 #endif
