@@ -1,10 +1,12 @@
 #ifndef MODEL_H
 #define MODEL_H
 
+#include <QtGui>
+
 struct BaseNode
 {
     virtual ~BaseNode() {}
-    QString notes;
+    QHash<QString, QVariant> notes;
 };
 
 
@@ -14,23 +16,17 @@ struct Act;
 struct Character;
 struct Frame;
 struct Event;
+struct Role;
+struct Actor;
 struct Play : public BaseNode
 {
-    ~Play()
-    {
-        foreach(Act *act, acts) {
-            act->play = 0;
-            delete act;
-        }
-        foreach(Character *character, characters) {
-            character->play = 0;
-            delete character;
-        }
-    }
+    ~Play();
 
-    QString name;
-    QList<Act*> acts;
+    QString name; // author, venue, stage etc?
     QList<Character*> characters;
+    QList<Role*> roles; // ### is this right?
+    QList<Act*> acts;
+    QList<Actor*> actors;
 
     void save(QIODevice *device) const;
     static Play *load(QIODevice *device);
@@ -41,15 +37,7 @@ struct Act : public BaseNode
     Act(Play *p)
         : play(p)
     {}
-    ~Act()
-    {
-        if (play)
-            play->acts.removeOne(this);
-        foreach(Frame *frame, frames) {
-            frame->act = 0;
-            delete frame;
-        }
-    }
+    ~Act();
     Play *play;
     QString name;
     QList<Frame*> frames;
@@ -60,15 +48,7 @@ struct Frame : public BaseNode
     Frame(Act *a)
         : act(a), seconds(-1), startTime(-1)
     {}
-    ~Frame()
-    {
-        if (act)
-            act->acts.removeOne(this);
-        foreach(Event *event, events) {
-            event->act = 0;
-            delete event;
-        }
-    }
+    ~Frame();
     Act *act;
     int seconds, startTime; // ### should I store start-time or calculate?
     QList<Event*> events;
@@ -77,6 +57,11 @@ struct Frame : public BaseNode
 // ### bad name?
 struct Event : public BaseNode
 {
+    enum Type {
+        Movement,
+        Line
+    };
+
     Event(Type t, Frame *f, Role *r)
         : type(t), frame(f), role(r), angle(0)
     {}
@@ -85,16 +70,12 @@ struct Event : public BaseNode
         if (frame)
             frame->events.removeOne(this);
     }
-    enum Type {
-        Movement,
-        Line
-    } type;
+    Type type;
     Frame *frame;
-    Role *Role;
+    Role *role;
     QPointF position;
-    QString line;
     qreal angle;
-
+    QString line;
 };
 
 struct Character : public BaseNode
@@ -110,7 +91,7 @@ struct Character : public BaseNode
     }
 
     Play *play;
-    QString name;
+    QString name; // this is a unique id
 };
 
 struct Role : public BaseNode
@@ -118,14 +99,22 @@ struct Role : public BaseNode
     Role(Character *c, Actor *a)
         : character(c), actor(a)
     {}
+    ~Role()
+    {
+        if (character && character->play) {
+            character->play->roles.removeOne(this);
+        }
+    }
     Character *character;
     Actor *actor;
 };
 
-struct Actor
+struct Actor : public BaseNode
 {
     QString name, address;
     QPixmap picture;
+
+    // name is a unique id
 };
 
 

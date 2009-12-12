@@ -4,6 +4,7 @@
 StageView::StageView(QWidget *parent)
     : QGraphicsView(parent)
 {
+    setOptimizationFlags(DontSavePainterState);
     setScene(d.stageScene = new StageScene(this));
 }
 

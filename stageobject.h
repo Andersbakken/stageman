@@ -5,9 +5,9 @@
 struct StageObject : public QGraphicsWidget
 {
     Q_OBJECT
-    Q_OBJECT(QPixmap pixmap READ pixmap WRITE setPixmap)
-    Q_OBJECT(QString text READ text WRITE setText)
-    Q_OBJECT(QPen pen READ pen WRITE setPen)
+    Q_PROPERTY(QPixmap pixmap READ pixmap WRITE setPixmap)
+    Q_PROPERTY(QString text READ text WRITE setText)
+    Q_PROPERTY(QPen pen READ pen WRITE setPen)
 public:
     StageObject() {}
 
@@ -15,7 +15,7 @@ public:
     void setPixmap(const QPixmap &pixmap) { d.pixmap = pixmap; update(); }
 
     QString text() const { return d.text; }
-    void setText(const QText &text) { d.text = text; update(); }
+    void setText(const QString &text) { d.text = text; update(); }
 
     QPen pen() const { return d.pen; }
     void setPen(const QPen &pen) { d.pen = pen; update(); }
@@ -32,9 +32,10 @@ private:
 struct ActorObject : public StageObject
 {
     Q_OBJECT
-    Q_PROPERTY(QString name READ name WRITE setName)
+//    Q_PROPERTY(QString name READ name WRITE setName)
 public:
-    Actor() : StageObject(ActorType) {}
+    ActorObject() : StageObject() {}
+
 };
 
 #endif
