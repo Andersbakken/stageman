@@ -4,6 +4,8 @@
 #include <QtGui>
 
 class StageView;
+struct Play;
+class PlayModel;
 class Window : public QMainWindow
 {
     Q_OBJECT
@@ -16,6 +18,9 @@ private:
         QSplitter *splitter;
         QSplitter *verticalSplitter;
         QTableView *objectTable, *sceneTable;
+        QTreeView *treeView;
+        Play *play;
+        PlayModel *model;
     } d;
 };
 

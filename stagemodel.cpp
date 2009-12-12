@@ -246,6 +246,7 @@ QVariant ModelItem::data(int role) const
 PlayModel::PlayModel(QObject *parent)
     : QStandardItemModel(parent)
 {
+    setColumnCount(4);
     d.play = 0;
 }
 
