@@ -136,27 +136,43 @@ struct Actor : public BaseNode
     enum { Type = ActorType };
     virtual NodeType type() const { return static_cast<NodeType>(Type); }
 
-    QString name, address;
+    QString name;
     QPixmap picture;
 
     // name is a unique id
 };
 
-class PlayModel : public QAbstractItemModel
+template <typename T> inline T *stageModelNodeCast(BaseNode *node)
+{
+    if (node && node->type() == T::Type)
+        return static_cast<T*>(node);
+    return 0;
+}
+
+class ModelItem : public QStandardItem
+{
+public:
+    ModelItem(BaseNode *n)
+        : node(n)
+    {}
+
+    QVariant data(int role = Qt::UserRole + 1) const;
+private:
+    BaseNode *node;
+};
+
+class PlayModel : public QStandardItemModel
 {
     Q_OBJECT
 public:
-    PlayModel(QObject *parent = 0);
+    PlayModel(QObject *parent);
     void setPlay(Play *play);
-    virtual QModelIndex index(int row, int column,
-                              const QModelIndex &parent = QModelIndex()) const;
-    virtual QModelIndex parent(const QModelIndex &child) const;
-    virtual int rowCount(const QModelIndex &parent = QModelIndex()) const;
-    virtual int columnCount(const QModelIndex &parent = QModelIndex()) const;
-    virtual QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
-    virtual bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole);
+    Play *play() const;
+    void refresh();
+private:
+    struct Data {
+        Play *play;
+    } d;
 };
-
-
 
 #endif

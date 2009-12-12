@@ -206,43 +206,106 @@ Frame::~Frame()
     }
 }
 
-PlayModel::PlayModel(QObject *parent)
-    : QAbstractItemModel(parent)
+QVariant ModelItem::data(int role) const
 {
+    if (node && role == Qt::DisplayRole) {
+        switch (node->type()) {
+        case BaseNode::PlayType:
+            return static_cast<Play*>(node)->name;
+        case BaseNode::ActType:
+            return static_cast<Act*>(node)->name;
+        case BaseNode::FrameType:
+            switch (column()) {
+            case 0: return static_cast<const Frame*>(node)->seconds;
+            case 1: return static_cast<const Frame*>(node)->startTime;
+            }
+            break;
+        case BaseNode::EventType:
+            switch (column()) {
+            case 0: return static_cast<const Event*>(node)->role->character->name;
+            case 1: return static_cast<const Event*>(node)->role->actor->name;
+            case 2: return static_cast<const Event*>(node)->position;
+            case 3: return static_cast<const Event*>(node)->angle;
+            }
+            break;
+        case BaseNode::RoleType:
+            switch (column()) {
+            case 0: return static_cast<const Role*>(node)->character->name;
+            case 1: return static_cast<const Role*>(node)->actor->name;
+            }
+            break;
+        case BaseNode::CharacterType:
+            return static_cast<const Character*>(node)->name;
+        case BaseNode::ActorType:
+            return static_cast<const Actor*>(node)->name;
+        }
+    }
+    return QStandardItem::data(role);
+}
 
+PlayModel::PlayModel(QObject *parent)
+    : QStandardItemModel(parent)
+{
+    d.play = 0;
 }
 
 void PlayModel::setPlay(Play *play)
 {
-
+    d.play = play;
+    refresh();
 }
 
-QModelIndex PlayModel::index(int row, int column, const QModelIndex &parent) const
+Play * PlayModel::play() const
 {
-
+    return d.play;
 }
 
-QModelIndex PlayModel::parent(const QModelIndex &child) const
+void PlayModel::refresh()
 {
+    invisibleRootItem()->removeRows(0, invisibleRootItem()->rowCount());
+    if (d.play) {
+        ModelItem *root = new ModelItem(d.play);
+        setItem(0, 0, root);
+        QStandardItem *characters = new QStandardItem("Characters");
+        root->setChild(0, 0, characters);
+        for (int i=0; i<d.play->characters.size(); ++i) {
+            characters->setChild(i, 0, new ModelItem(d.play->characters.at(i)));
+        }
+        QStandardItem *actors = new QStandardItem("Actors");
+        root->setChild(1, 0, actors);
+        for (int i=0; i<d.play->actors.size(); ++i) {
+            actors->setChild(i, 0, new ModelItem(d.play->actors.at(i)));
+        }
+        QStandardItem *roles = new QStandardItem("Roles");
+        root->setChild(2, 0, roles);
+        for (int i=0; i<d.play->roles.size(); ++i) {
+            for (int j=0; j<4; ++j) {
+                roles->setChild(i, j, new ModelItem(d.play->roles.at(i)));
+            }
+        }
 
-}
+        QStandardItem *acts = new QStandardItem("Acts");
+        root->setChild(3, 0, acts);
+        for (int i=0; i<d.play->acts.size(); ++i) {
+            Act *a = d.play->acts.at(i);
+            ModelItem *act = new ModelItem(a);
+            acts->setChild(i, 0, act);
+            for (int j=0; j<a->frames.size(); ++j) {
+                Frame *f = a->frames.at(j);
+                ModelItem *frame;
+                for (int jj=0; jj<2; ++jj) {
+                    frame = new ModelItem(f);
+                    act->setChild(j, jj, frame);
+                }
 
-int PlayModel::rowCount(const QModelIndex &parent) const
-{
-
-}
-
-int PlayModel::columnCount(const QModelIndex &parent) const
-{
-
-}
-
-QVariant PlayModel::data(const QModelIndex &index, int role ) const
-{
-
-}
-
-bool PlayModel::setData(const QModelIndex &index, const QVariant &value, int role )
-{
-
+                for (int k=0; k<f->events.size(); ++k) {
+                    Event *e = f->events.at(k);
+                    for (int kk=0; kk<4; ++kk) {
+                        ModelItem *event = new ModelItem(e);
+                        frame->setChild(k, kk, event);
+                    }
+                }
+            }
+        }
+    }
 }
