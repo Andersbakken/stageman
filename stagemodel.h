@@ -5,7 +5,17 @@
 
 struct BaseNode
 {
+    enum NodeType {
+        PlayType,
+        ActType,
+        FrameType,
+        EventType,
+        RoleType,
+        CharacterType,
+        ActorType
+    };
     virtual ~BaseNode() {}
+    virtual NodeType type() const = 0;
     QHash<QString, QVariant> notes;
 };
 
@@ -21,6 +31,8 @@ struct Actor;
 struct Play : public BaseNode
 {
     ~Play();
+    enum { Type = PlayType };
+    virtual NodeType type() const { return static_cast<NodeType>(Type); }
 
     QString name; // author, venue, stage etc?
     QList<Character*> characters;
@@ -38,6 +50,9 @@ struct Act : public BaseNode
     Act(Play *p)
         : play(p)
     {}
+    enum { Type = ActType };
+    virtual NodeType type() const { return static_cast<NodeType>(Type); }
+
     ~Act();
     Play *play;
     QString name;
@@ -49,6 +64,9 @@ struct Frame : public BaseNode
     Frame(Act *a)
         : act(a), seconds(-1), startTime(-1)
     {}
+    enum { Type = FrameType };
+    virtual NodeType type() const { return static_cast<NodeType>(Type); }
+
     ~Frame();
     Act *act;
     int seconds, startTime; // ### should I store start-time or calculate?
@@ -58,20 +76,17 @@ struct Frame : public BaseNode
 // ### bad name?
 struct Event : public BaseNode
 {
-    enum Type {
-        Movement,
-        Line
-    };
-
-    Event(Type t, Frame *f, Role *r)
-        : type(t), frame(f), role(r), angle(0)
+    Event(Frame *f, Role *r)
+        : frame(f), role(r), angle(0)
     {}
+    enum { Type = EventType };
+    virtual NodeType type() const { return static_cast<NodeType>(Type); }
+
     ~Event()
     {
         if (frame)
             frame->events.removeOne(this);
     }
-    Type type;
     Frame *frame;
     Role *role;
     QPointF position;
@@ -85,6 +100,9 @@ struct Character : public BaseNode
         : play(p)
     {
     }
+    enum { Type = CharacterType };
+    virtual NodeType type() const { return static_cast<NodeType>(Type); }
+
     ~Character()
     {
         if (play)
@@ -100,6 +118,9 @@ struct Role : public BaseNode
     Role(Character *c, Actor *a)
         : character(c), actor(a)
     {}
+    enum { Type = RoleType };
+    virtual NodeType type() const { return static_cast<NodeType>(Type); }
+
     ~Role()
     {
         if (character && character->play) {
@@ -112,6 +133,9 @@ struct Role : public BaseNode
 
 struct Actor : public BaseNode
 {
+    enum { Type = ActorType };
+    virtual NodeType type() const { return static_cast<NodeType>(Type); }
+
     QString name, address;
     QPixmap picture;
 

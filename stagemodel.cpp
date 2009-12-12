@@ -94,7 +94,7 @@ void Play::save(QIODevice *device) const
             ds << frame->seconds << frame->startTime << frame->notes << qint32(frame->events.size());
             for (int k=0; k<frame->events.size(); ++k) {
                 const Event *event = frame->events.at(k);
-                ds << quint8(event->type) << event->role->character->name
+                ds << event->role->character->name
                    << event->role->actor->name << event->position
                    << event->angle << event->line << event->notes;
             }
@@ -168,14 +168,13 @@ Play *Play::load(QIODevice *device)
             qint32 eventCount;
             ds >> eventCount;
             for (int k=0; k<eventCount; ++k) {
-                quint8 eventType;
                 QString characterName, actorName;
-                ds >> eventType >> characterName >> actorName;
+                ds >> characterName >> actorName;
                 Role *role = roles.value((QStringList() << characterName << actorName));
                 Event *event;
                 if (!role)
                     goto error;
-                event = new Event(static_cast<Event::Type>(eventType), frame, role);
+                event = new Event(frame, role);
                 frame->events.append(event);
             }
         }
