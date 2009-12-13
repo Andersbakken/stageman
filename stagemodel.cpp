@@ -210,6 +210,8 @@ QVariant ModelItem::data(int role) const
 {
     if (node && role == Qt::DisplayRole) {
         switch (node->type()) {
+        case BaseNode::ObjectType:
+            return static_cast<Object*>(node)->name;
         case BaseNode::PlayType:
             return static_cast<Play*>(node)->name;
         case BaseNode::ActType:

@@ -12,11 +12,13 @@ struct BaseNode
         EventType,
         RoleType,
         CharacterType,
-        ActorType
+        ActorType,
+        ObjectType
     };
     virtual ~BaseNode() {}
     virtual NodeType type() const = 0;
     QHash<QString, QVariant> notes;
+    QRectF rect; // ### ugly
 };
 
 
@@ -28,6 +30,7 @@ struct Frame;
 struct Event;
 struct Role;
 struct Actor;
+struct Object;
 struct Play : public BaseNode
 {
     ~Play();
@@ -37,6 +40,7 @@ struct Play : public BaseNode
     QString name; // author, venue, stage etc?
     QList<Character*> characters;
     QList<Role*> roles; // ### is this right?
+    QList<Object*> objects; // ### is this right?
     QList<Act*> acts;
     QList<Actor*> actors;
 
@@ -94,6 +98,22 @@ struct Event : public BaseNode
     QString line;
 };
 
+class Object : public BaseNode
+{
+public:
+//    Object(const QPainterPath &p)
+    Object(const QRectF &r)
+    {
+        rect = r;
+    }
+    enum { Type = ObjectType };
+    virtual NodeType type() const { return static_cast<NodeType>(Type); }
+
+    QString name;
+//    QPainterPath path;
+//    QRectF rect;
+};
+
 struct Character : public BaseNode
 {
     Character(Play *p)
@@ -117,7 +137,9 @@ struct Role : public BaseNode
 {
     Role(Character *c, Actor *a)
         : character(c), actor(a)
-    {}
+    {
+        rect = QRectF(0, 0, 100, 100);
+    }
     enum { Type = RoleType };
     virtual NodeType type() const { return static_cast<NodeType>(Type); }
 
