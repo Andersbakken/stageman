@@ -54,6 +54,23 @@ Play *Play::createRandomPlay()
         play->roles.append(role);
     }
 
+    static const char *actNames[] = { "First Act", "Second Act", "Last Act", 0 };
+    for (int i=0; actNames[i]; ++i) {
+        Act *act = new Act(play);
+        act->name = actNames[i];
+        int time = 0;
+        do {
+            Frame *frame = new Frame(act);
+            frame->startTime = time;
+            frame->seconds = (rand() % 120) + 10;
+            act->frames.append(frame);
+            // ### add events
+        } while (rand() % 20 != 0);
+
+        play->acts.append(act);
+    }
+
+
     return play;
 }
 
