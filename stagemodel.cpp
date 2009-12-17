@@ -27,6 +27,61 @@ static QString randomWord()
     return t;
 }
 
+static inline QPointF bound(const QRectF &rect, const QPointF &pos)
+{
+    return QPointF(qBound(rect.left(), pos.x(), rect.right()),
+                   qBound(rect.top(), pos.y(), rect.bottom()));
+}
+
+static const char *quotes[] = {
+    "A wretched soul, bruised with adversity, We bid be quiet when we hear it cry; But were we burdened with like weight of pain, As much or more we should ourselves complain.",
+    "Action is eloquence.",
+    "And since you know you cannot see yourself, so well as by reflection, I, your glass, will modestly discover to yourself, that of yourself which you yet know not of.",
+    "And thus I clothe my naked villainy With old odd ends, stol'n forth of holy writ; And seem a saint, when most I play the devil. [info][add][mail]",
+    "Assume a virtue, if you have it not.",
+    "Be great in act, as you have been in thought.",
+    "Blow, blow, thou winter wind",
+    "Thou art not so unkind, As man's ingratitude.",
+    "Conversation should be pleasant without scurrility, witty without affectation, free without indecency, learned without conceitedness, novel without falsehood.",
+    "For they are yet ear-kissing arguments.",
+    "Free from gross passion or of mirth or anger constant in spirit, not swerving with the blood, garnish'd and deck'd in modest compliment, not working with the eye without the ear, and but in purged judgement trusting neither? Such and so finely bolted didst thou seem.",
+    "Glory is like a circle in the water, Which never ceaseth to enlarge itself, Till by broad spreading it disperses to naught.",
+    "God bless thee; and put meekness in thy mind, love, charity, obedience, and true duty!",
+    "He who has injured thee was either stronger or weaker than thee. If weaker, spare him; if stronger, spare thyself.",
+    "His life was gentle; and the elements So mixed in him, that Nature might stand up, And say to all the world, THIS WAS A MAN!",
+    "How poor are they who have not patience! What wound did ever heal but by degrees.",
+    "How use doth breed a habit in a man.",
+    "I am not bound to please thee with my answers.",
+    "I did never know so full a voice issue from so empty a heart: but the saying is true 'The empty vessel makes the greatest sound'.",
+    "I dote on his very absence.",
+    "I feel within me a peace above all earthly dignities, a still and quiet conscience.",
+    "I hate ingratitude more in a man than lying, vainness, babbling, drunkenness, or any taint of vice whose strong corruption inhabits our frail blood.",
+    "I must be cruel only to be kind; Thus bad begins, and worse remains behind.",
+    "I pray thee cease thy counsel, Which falls into mine ears as profitless as water in a sieve.",
+    "I pray you bear me henceforth from the noise and rumour of the field, where I may think the remnant of my thoughts in peace, and part of this body and my soul with contemplation and devout desires.",
+    "I wasted time, and now doth time waste me.",
+    "I wish you well and so I take my leave,",
+    "I Pray you know me when we meet again.",
+    "Ill deeds are doubled with an evil word.",
+    "In a false quarrel there is no true valour.",
+    "In peace there's nothing so becomes a man as modest stillness and humility.",
+    "In time we hate that which we often fear.",
+    0
+};
+
+static inline QString randomLine()
+{
+    int hops = rand() % 160;
+    int idx = 0;
+    for (int i=0; i<hops; ++i) {
+        if (!quotes[++idx]) {
+            idx = 0;
+        }
+    }
+    return quotes[idx];
+}
+
+
 
 Play *Play::createRandomPlay()
 {
@@ -59,11 +114,39 @@ Play *Play::createRandomPlay()
         Act *act = new Act(play);
         act->name = actNames[i];
         int time = 0;
+        QList<Role*> rolesInvolvedInAct = play->roles;
+        for (int i=0; i<rolesInvolvedInAct.size() / 3; ++i) {
+            rolesInvolvedInAct.removeAt(rand() % rolesInvolvedInAct.size());
+        }
+
+        QHash<Role*, QPointF> lastPos;
+
         do {
             Frame *frame = new Frame(act);
             frame->startTime = time;
             frame->seconds = (rand() % 120) + 10;
             act->frames.append(frame);
+            for (int i=0; i<rolesInvolvedInAct.size(); ++i) {
+                Role *role = rolesInvolvedInAct.at(i);
+                Event *event = new Event(frame, role);
+                QPointF pos;
+                static const QRect sceneRect(0, 0, 1000, 1000);
+                if (lastPos.contains(role)) {
+                    QLineF line(pos, pos);
+                    line.setAngle(rand() % 360);
+                    line.setLength(200);
+                    pos = bound(sceneRect, pos);
+                } else {
+                    pos = QPointF(rand() % sceneRect.width(), rand() % sceneRect.height()) + sceneRect.topLeft();
+                }
+
+                event->position = pos;
+                event->angle = rand() % 360;
+                event->line = randomLine();
+                frame->events.append(event);
+                lastPos[role] = pos;
+            }
+
             // ### add events
         } while (rand() % 20 != 0);
 
