@@ -164,23 +164,29 @@ struct Actor : public StageNode
     // name is a unique id
 };
 
-template <typename T> inline T *stageModelNodeCast(StageNode *node)
+template <typename T> inline T stageModelNodeCast(StageNode *node)
 {
-    if (node && node->type() == T::Type)
-        return static_cast<T*>(node);
+    if (node && node->type() == static_cast<StageNode::NodeType>(static_cast<T>(0)->Type))
+        return static_cast<T>(node);
     return 0;
 }
 
 class ModelItem : public QStandardItem
 {
 public:
-    ModelItem(StageNode *n)
-        : node(n)
-    {}
+    ModelItem(StageNode *node)
+    {
+        d.node = node;
+    }
 
     QVariant data(int role = Qt::UserRole + 1) const;
+    StageNode *node() const {
+        return d.node;
+    }
 private:
-    StageNode *node;
+    struct Data {
+        StageNode *node;
+    } d;
 };
 
 class StageModel : public QStandardItemModel

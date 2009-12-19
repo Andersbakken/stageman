@@ -12,6 +12,7 @@ class Window : public QMainWindow
 public:
     Window(QWidget *parent = 0);
     void closeEvent(QCloseEvent *e);
+    void onCurrentChanged(const QModelIndex &idx);
 private:
     struct Data {
         StageView *stageView;

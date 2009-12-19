@@ -1,6 +1,7 @@
 #include "window.h"
 #include "stageview.h"
 #include "stagemodel.h"
+#include "stagescene.h"
 
 Window::Window(QWidget *parent)
     : QMainWindow(parent)
@@ -31,4 +32,15 @@ void Window::closeEvent(QCloseEvent *e)
     settings.setValue("splitter", d.splitter->saveState());
     settings.setValue("verticalSplitter", d.verticalSplitter->saveState());
     QMainWindow::closeEvent(e);
+}
+
+void Window::onCurrentChanged(const QModelIndex &idx)
+{
+    QStandardItem *item = d.model->itemFromIndex(idx);
+    if (item) {
+        ModelItem *modelItem = static_cast<ModelItem*>(item);
+        if (Act *act = stageModelNodeCast<Act*>(modelItem->node())) {
+            d.stageView->stageScene()->setAct(act);
+        }
+    }
 }

@@ -9,6 +9,7 @@ class StageView : public QGraphicsView
 public:
     StageView(QWidget *parent = 0);
     void resizeEvent(QResizeEvent *e);
+    StageScene *stageScene() const { return d.stageScene; }
 private:
     struct Data {
         StageScene *stageScene;

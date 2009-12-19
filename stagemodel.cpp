@@ -308,38 +308,38 @@ Frame::~Frame()
 
 QVariant ModelItem::data(int role) const
 {
-    if (node && role == Qt::DisplayRole) {
-        switch (node->type()) {
+    if (d.node && role == Qt::DisplayRole) {
+        switch (d.node->type()) {
         case StageNode::ObjectType:
-            return static_cast<Object*>(node)->name;
+            return static_cast<Object*>(d.node)->name;
         case StageNode::PlayType:
-            return static_cast<Play*>(node)->name;
+            return static_cast<Play*>(d.node)->name;
         case StageNode::ActType:
-            return static_cast<Act*>(node)->name;
+            return static_cast<Act*>(d.node)->name;
         case StageNode::FrameType:
             switch (column()) {
-            case 0: return static_cast<const Frame*>(node)->seconds;
-            case 1: return static_cast<const Frame*>(node)->startTime;
+            case 0: return static_cast<const Frame*>(d.node)->seconds;
+            case 1: return static_cast<const Frame*>(d.node)->startTime;
             }
             break;
         case StageNode::EventType:
             switch (column()) {
-            case 0: return static_cast<const Event*>(node)->role->character->name;
-            case 1: return static_cast<const Event*>(node)->role->actor->name;
-            case 2: return static_cast<const Event*>(node)->position;
-            case 3: return static_cast<const Event*>(node)->angle;
+            case 0: return static_cast<const Event*>(d.node)->role->character->name;
+            case 1: return static_cast<const Event*>(d.node)->role->actor->name;
+            case 2: return static_cast<const Event*>(d.node)->position;
+            case 3: return static_cast<const Event*>(d.node)->angle;
             }
             break;
         case StageNode::RoleType:
             switch (column()) {
-            case 0: return static_cast<const Role*>(node)->character->name;
-            case 1: return static_cast<const Role*>(node)->actor->name;
+            case 0: return static_cast<const Role*>(d.node)->character->name;
+            case 1: return static_cast<const Role*>(d.node)->actor->name;
             }
             break;
         case StageNode::CharacterType:
-            return static_cast<const Character*>(node)->name;
+            return static_cast<const Character*>(d.node)->name;
         case StageNode::ActorType:
-            return static_cast<const Actor*>(node)->name;
+            return static_cast<const Actor*>(d.node)->name;
         }
     }
     return QStandardItem::data(role);
