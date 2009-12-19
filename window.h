@@ -5,7 +5,7 @@
 
 class StageView;
 struct Play;
-class PlayModel;
+class StageModel;
 class Window : public QMainWindow
 {
     Q_OBJECT
@@ -20,7 +20,7 @@ private:
         QTableView *objectTable, *sceneTable;
         QTreeView *treeView;
         Play *play;
-        PlayModel *model;
+        StageModel *model;
     } d;
 };
 

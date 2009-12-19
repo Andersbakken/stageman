@@ -17,7 +17,7 @@ Window::Window(QWidget *parent)
     d.splitter->restoreState(settings.value("splitter").toByteArray());
     d.verticalSplitter->restoreState(settings.value("verticalSplitter").toByteArray());
     d.play = Play::createRandomPlay();
-    d.model = new PlayModel(this);
+    d.model = new StageModel(this);
     d.model->setPlay(d.play);
     d.objectTable->setModel(d.model);
     d.treeView->setModel(d.model);

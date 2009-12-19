@@ -3,7 +3,7 @@
 
 #include <QtGui>
 
-struct BaseNode
+struct StageNode
 {
     enum NodeType {
         PlayType,
@@ -15,7 +15,7 @@ struct BaseNode
         ActorType,
         ObjectType
     };
-    virtual ~BaseNode() {}
+    virtual ~StageNode() {}
     virtual NodeType type() const = 0;
     QHash<QString, QVariant> notes;
     QRectF rect; // ### ugly
@@ -31,7 +31,7 @@ struct Event;
 struct Role;
 struct Actor;
 struct Object;
-struct Play : public BaseNode
+struct Play : public StageNode
 {
     ~Play();
     enum { Type = PlayType };
@@ -49,7 +49,7 @@ struct Play : public BaseNode
     static Play *createRandomPlay();
 };
 
-struct Act : public BaseNode
+struct Act : public StageNode
 {
     Act(Play *p)
         : play(p)
@@ -63,7 +63,7 @@ struct Act : public BaseNode
     QList<Frame*> frames;
 };
 
-struct Frame : public BaseNode
+struct Frame : public StageNode
 {
     Frame(Act *a)
         : act(a), seconds(-1), startTime(-1)
@@ -78,7 +78,7 @@ struct Frame : public BaseNode
 };
 
 // ### bad name?
-struct Event : public BaseNode
+struct Event : public StageNode
 {
     Event(Frame *f, Role *r)
         : frame(f), role(r), angle(0)
@@ -98,7 +98,7 @@ struct Event : public BaseNode
     QString line;
 };
 
-class Object : public BaseNode
+class Object : public StageNode
 {
 public:
 //    Object(const QPainterPath &p)
@@ -114,7 +114,7 @@ public:
 //    QRectF rect;
 };
 
-struct Character : public BaseNode
+struct Character : public StageNode
 {
     Character(Play *p)
         : play(p)
@@ -133,7 +133,7 @@ struct Character : public BaseNode
     QString name; // this is a unique id
 };
 
-struct Role : public BaseNode
+struct Role : public StageNode
 {
     Role(Character *c, Actor *a)
         : character(c), actor(a)
@@ -153,7 +153,7 @@ struct Role : public BaseNode
     Actor *actor;
 };
 
-struct Actor : public BaseNode
+struct Actor : public StageNode
 {
     enum { Type = ActorType };
     virtual NodeType type() const { return static_cast<NodeType>(Type); }
@@ -164,7 +164,7 @@ struct Actor : public BaseNode
     // name is a unique id
 };
 
-template <typename T> inline T *stageModelNodeCast(BaseNode *node)
+template <typename T> inline T *stageModelNodeCast(StageNode *node)
 {
     if (node && node->type() == T::Type)
         return static_cast<T*>(node);
@@ -174,20 +174,20 @@ template <typename T> inline T *stageModelNodeCast(BaseNode *node)
 class ModelItem : public QStandardItem
 {
 public:
-    ModelItem(BaseNode *n)
+    ModelItem(StageNode *n)
         : node(n)
     {}
 
     QVariant data(int role = Qt::UserRole + 1) const;
 private:
-    BaseNode *node;
+    StageNode *node;
 };
 
-class PlayModel : public QStandardItemModel
+class StageModel : public QStandardItemModel
 {
     Q_OBJECT
 public:
-    PlayModel(QObject *parent);
+    StageModel(QObject *parent);
     void setPlay(Play *play);
     Play *play() const;
     void refresh();

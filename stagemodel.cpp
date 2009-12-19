@@ -310,19 +310,19 @@ QVariant ModelItem::data(int role) const
 {
     if (node && role == Qt::DisplayRole) {
         switch (node->type()) {
-        case BaseNode::ObjectType:
+        case StageNode::ObjectType:
             return static_cast<Object*>(node)->name;
-        case BaseNode::PlayType:
+        case StageNode::PlayType:
             return static_cast<Play*>(node)->name;
-        case BaseNode::ActType:
+        case StageNode::ActType:
             return static_cast<Act*>(node)->name;
-        case BaseNode::FrameType:
+        case StageNode::FrameType:
             switch (column()) {
             case 0: return static_cast<const Frame*>(node)->seconds;
             case 1: return static_cast<const Frame*>(node)->startTime;
             }
             break;
-        case BaseNode::EventType:
+        case StageNode::EventType:
             switch (column()) {
             case 0: return static_cast<const Event*>(node)->role->character->name;
             case 1: return static_cast<const Event*>(node)->role->actor->name;
@@ -330,40 +330,40 @@ QVariant ModelItem::data(int role) const
             case 3: return static_cast<const Event*>(node)->angle;
             }
             break;
-        case BaseNode::RoleType:
+        case StageNode::RoleType:
             switch (column()) {
             case 0: return static_cast<const Role*>(node)->character->name;
             case 1: return static_cast<const Role*>(node)->actor->name;
             }
             break;
-        case BaseNode::CharacterType:
+        case StageNode::CharacterType:
             return static_cast<const Character*>(node)->name;
-        case BaseNode::ActorType:
+        case StageNode::ActorType:
             return static_cast<const Actor*>(node)->name;
         }
     }
     return QStandardItem::data(role);
 }
 
-PlayModel::PlayModel(QObject *parent)
+StageModel::StageModel(QObject *parent)
     : QStandardItemModel(parent)
 {
     setColumnCount(4);
     d.play = 0;
 }
 
-void PlayModel::setPlay(Play *play)
+void StageModel::setPlay(Play *play)
 {
     d.play = play;
     refresh();
 }
 
-Play * PlayModel::play() const
+Play * StageModel::play() const
 {
     return d.play;
 }
 
-void PlayModel::refresh()
+void StageModel::refresh()
 {
     invisibleRootItem()->removeRows(0, invisibleRootItem()->rowCount());
     if (d.play) {
