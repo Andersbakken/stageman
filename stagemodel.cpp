@@ -132,22 +132,21 @@ Play *Play::createRandomPlay()
                 QPointF pos;
                 static const QRect sceneRect(0, 0, 1000, 1000);
                 if (lastPos.contains(role)) {
-                    QLineF line(pos, pos);
+                    QLineF line(lastPos.value(role), QPointF(1, 1));
                     line.setAngle(rand() % 360);
                     line.setLength(200);
-                    pos = bound(sceneRect, pos);
+                    pos = bound(sceneRect, line.p2());
                 } else {
                     pos = QPointF(rand() % sceneRect.width(), rand() % sceneRect.height()) + sceneRect.topLeft();
                 }
 
                 event->position = pos;
+                qDebug() << pos;
                 event->angle = rand() % 360;
                 event->line = randomLine();
                 frame->events.append(event);
                 lastPos[role] = pos;
             }
-
-            // ### add events
         } while (rand() % 20 != 0);
 
         play->acts.append(act);
@@ -326,8 +325,11 @@ QVariant ModelItem::data(int role) const
             switch (column()) {
             case 0: return static_cast<const Event*>(d.node)->role->character->name;
             case 1: return static_cast<const Event*>(d.node)->role->actor->name;
-            case 2: return static_cast<const Event*>(d.node)->position;
-            case 3: return static_cast<const Event*>(d.node)->angle;
+            case 2: return QString("%1 %2").
+                    arg(static_cast<const Event*>(d.node)->position.x()).
+                    arg(static_cast<const Event*>(d.node)->position.y());
+            case 3: return QString("%1%2").arg(static_cast<const Event*>(d.node)->angle).
+                    arg(QChar(0x00B0));
             }
             break;
         case StageNode::RoleType:
@@ -396,7 +398,7 @@ void StageModel::refresh()
             for (int j=0; j<a->frames.size(); ++j) {
                 Frame *f = a->frames.at(j);
                 ModelItem *frame;
-                for (int jj=0; jj<2; ++jj) {
+                for (int jj=1; jj>=0; --jj) { // children must be child of item in column 0
                     frame = new ModelItem(f);
                     act->setChild(j, jj, frame);
                 }
@@ -411,4 +413,34 @@ void StageModel::refresh()
             }
         }
     }
+}
+
+QSet<Role*> Act::rolesInAct() const
+{
+    QSet<Role*> ret;
+    foreach(Frame *frame, frames) {
+        foreach(Event *event, frame->events) {
+            ret.insert(event->role);
+        }
+    }
+    return ret;
+}
+
+QSet<Role*> Act::rolesNotInAct() const
+{
+    QSet<Role*> ret;
+    if (play) {
+        ret = play->roles.toSet();
+        foreach(Frame *frame, frames) {
+            foreach(Event *event, frame->events) {
+                ret.remove(event->role);
+            }
+        }
+    }
+    return ret;
+}
+
+void StageModel::setCurrentItem(QStandardItem *standardItem)
+{
+    // change columns based on what is current
 }

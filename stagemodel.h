@@ -61,6 +61,9 @@ struct Act : public StageNode
     Play *play;
     QString name;
     QList<Frame*> frames;
+
+    QSet<Role*> rolesInAct() const;
+    QSet<Role*> rolesNotInAct() const;
 };
 
 struct Frame : public StageNode
@@ -197,6 +200,7 @@ public:
     void setPlay(Play *play);
     Play *play() const;
     void refresh();
+    void setCurrentItem(QStandardItem *standardItem);
 private:
     struct Data {
         Play *play;
