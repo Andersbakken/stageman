@@ -179,6 +179,7 @@ class ModelItem : public QStandardItem
 public:
     ModelItem(StageNode *node)
     {
+        setFlags(Qt::ItemIsSelectable|Qt::ItemIsEnabled|Qt::ItemIsDragEnabled|Qt::ItemIsDropEnabled);
         d.node = node;
     }
 

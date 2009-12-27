@@ -141,7 +141,6 @@ Play *Play::createRandomPlay()
                 }
 
                 event->position = pos;
-                qDebug() << pos;
                 event->angle = rand() % 360;
                 event->line = randomLine();
                 frame->events.append(event);
