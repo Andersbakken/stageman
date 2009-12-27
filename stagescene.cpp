@@ -4,23 +4,34 @@
 StageScene::StageScene(QObject *parent)
     : QGraphicsScene(parent)
 {
+    connect(this, SIGNAL(sceneRectChanged(QRectF)), this, SLOT(onSceneRectChanged(QRectF)));
+    d.root = 0;
+    d.stateMachine = 0;
     d.act = 0;
+    d.textItem = 0;
 }
 
 void StageScene::setAct(Act *act)
 {
+    clear();
     qDeleteAll(d.frameStates);
     d.frameStates.clear();
     delete d.root;
     d.root = 0;
-    qDeleteAll(d.roles);
     d.roles.clear();
     d.act = act;
+    delete d.stateMachine;
+    d.stateMachine = 0;
+    d.textItem = 0;
     if (act) {
+        d.textItem = addSimpleText(act->name);
+        d.textItem->setPos(0, 0);
+        int counter = 0;
         d.root = new QState;
         QState *previousState = 0;
         foreach(Frame *frame, act->frames) {
             QState *frameState = new QState(d.root);
+            frameState->setObjectName(QString::number(counter++));
             d.frameStates.append(frameState);
             QAbstractTransition *transitionNext = 0, *transitionPrevious = 0;
             if (previousState) {
@@ -34,6 +45,7 @@ void StageScene::setAct(Act *act)
                 StageGraphicsItem *item = d.roles.value(event->role);
                 if (!item) {
                     item = new StageGraphicsItem(event->role);
+                    item->resize(100, 100);
                     addItem(item);
                     d.roles[event->role] = item;
                 }
@@ -49,9 +61,10 @@ void StageScene::setAct(Act *act)
             }
             previousState = frameState;
         }
-        d.stateMachine.addState(d.root);
-        d.stateMachine.setInitialState(d.root);
-        d.stateMachine.start();
+        d.stateMachine = new QStateMachine(this);
+        d.stateMachine->addState(d.root);
+        d.stateMachine->setInitialState(d.root);
+        d.stateMachine->start();
     }
 }
 
@@ -69,10 +82,14 @@ void StageScene::keyPressEvent(QKeyEvent *event)
 {
     switch (event->key()) {
     case Qt::Key_Left:
-        emit nextFrame();
-        break;
+    case Qt::Key_Space:
+        if (event->key() == Qt::Key_Left || event->modifiers() == Qt::ShiftModifier) {
+            emit previousFrame();
+            break;
+        }
+        // fall through
     case Qt::Key_Right:
-        emit previousFrame();
+        emit nextFrame();
         break;
     default:
         QGraphicsScene::keyPressEvent(event);
@@ -122,11 +139,15 @@ void StageScene::setCurrentFrame(Frame *frame)
 {
     setAct(0);
     clear();
-    qDebug() << frame;
     foreach(Event *event, frame->events) {
         StageGraphicsItem *item = new StageGraphicsItem(event->role);
         item->setRotation(event->angle);
         item->setPos(event->position);
         addItem(item);
     }
+}
+void StageScene::onSceneRectChanged(const QRectF &r)
+{
+    if (d.textItem)
+        d.textItem->setPos(r.topLeft());
 }

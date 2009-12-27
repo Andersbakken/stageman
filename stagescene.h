@@ -30,6 +30,8 @@ public:
     void timerEvent(QTimerEvent *e);
     void keyPressEvent(QKeyEvent *event);
     void setCurrentFrame(Frame *frame);
+public slots:
+    void onSceneRectChanged(const QRectF &r);
 signals:
     void nextFrame();
     void previousFrame();
@@ -40,7 +42,8 @@ private:
         QBasicTimer nextFrameTimer;
         QList<QState*> frameStates;
         QHash<Role*, StageGraphicsItem*> roles;
-        QStateMachine stateMachine;
+        QStateMachine *stateMachine;
+        QGraphicsSimpleTextItem *textItem;
     } d;
 };
 
