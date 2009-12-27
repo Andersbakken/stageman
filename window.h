@@ -12,6 +12,7 @@ class Window : public QMainWindow
 public:
     Window(QWidget *parent = 0);
     void closeEvent(QCloseEvent *e);
+public slots:
     void onCurrentChanged(const QModelIndex &idx);
 private:
     struct Data {

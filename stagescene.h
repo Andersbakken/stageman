@@ -4,12 +4,14 @@
 #include <QtGui>
 struct Act;
 struct StageNode;
+struct Frame;
 class StageGraphicsItem : public QGraphicsWidget
 {
     Q_OBJECT
 public:
     StageGraphicsItem(StageNode *node);
     QAbstractAnimation *animation() const;
+    void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget = 0);
 private:
     struct Data {
         StageNode *node;
@@ -27,6 +29,7 @@ public:
     void animate();
     void timerEvent(QTimerEvent *e);
     void keyPressEvent(QKeyEvent *event);
+    void setCurrentFrame(Frame *frame);
 signals:
     void nextFrame();
     void previousFrame();

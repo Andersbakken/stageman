@@ -91,7 +91,42 @@ StageGraphicsItem::StageGraphicsItem(StageNode *node)
     d.animation = group;
 }
 
+void StageGraphicsItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *)
+{
+    switch (d.node->type()) {
+    case StageNode::RoleType: {
+        static QPixmap pixmap;
+        if (pixmap.isNull()) {
+            pixmap.load("smileyface.jpg");
+            pixmap.setMask(pixmap.createHeuristicMask());
+        }
+        painter->drawPixmap(option->rect, pixmap);
+        painter->drawText(option->rect, Qt::AlignCenter, static_cast<Role*>(d.node)->character->name);
+        break;
+    }
+    case StageNode::ObjectType:
+        painter->fillRect(option->rect, Qt::red);
+        break;
+    default:
+        break;
+    }
+}
+
+
 QAbstractAnimation *StageGraphicsItem::animation() const
 {
     return d.animation;
+}
+
+void StageScene::setCurrentFrame(Frame *frame)
+{
+    setAct(0);
+    clear();
+    qDebug() << frame;
+    foreach(Event *event, frame->events) {
+        StageGraphicsItem *item = new StageGraphicsItem(event->role);
+        item->setRotation(event->angle);
+        item->setPos(event->position);
+        addItem(item);
+    }
 }

@@ -5,6 +5,7 @@ StageView::StageView(QWidget *parent)
     : QGraphicsView(parent)
 {
     setOptimizationFlags(DontSavePainterState);
+    setRenderHints(QPainter::Antialiasing);
     setScene(d.stageScene = new StageScene(this));
 }
 

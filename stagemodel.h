@@ -21,6 +21,7 @@ struct StageNode
     QRectF rect; // ### ugly
 };
 
+Q_DECLARE_METATYPE(StageNode*);
 
 // do I need a time class?
 
@@ -184,6 +185,7 @@ public:
     }
 
     QVariant data(int role = Qt::UserRole + 1) const;
+    enum { StageNodeRole = Qt::UserRole + 2 };
     StageNode *node() const {
         return d.node;
     }

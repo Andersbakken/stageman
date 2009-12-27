@@ -22,6 +22,8 @@ Window::Window(QWidget *parent)
     d.model->setPlay(d.play);
     d.objectTable->setModel(d.model);
     d.treeView->setModel(d.model);
+    connect(d.treeView->selectionModel(), SIGNAL(currentChanged(QModelIndex,QModelIndex)),
+            this, SLOT(onCurrentChanged(QModelIndex)));
 //    d.verticalSplitter->setModel(d.model);
 }
 
@@ -36,11 +38,11 @@ void Window::closeEvent(QCloseEvent *e)
 
 void Window::onCurrentChanged(const QModelIndex &idx)
 {
-    QStandardItem *item = d.model->itemFromIndex(idx);
-    if (item) {
-        ModelItem *modelItem = static_cast<ModelItem*>(item);
-        if (Act *act = stageModelNodeCast<Act*>(modelItem->node())) {
+    if (StageNode *node = qVariantValue<StageNode*>(idx.data(ModelItem::StageNodeRole))) {
+        if (Act *act = stageModelNodeCast<Act*>(node)) {
             d.stageView->stageScene()->setAct(act);
+        } else if (Frame *frame = stageModelNodeCast<Frame*>(node)) {
+            d.stageView->stageScene()->setCurrentFrame(frame);
         }
     }
 }

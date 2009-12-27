@@ -342,6 +342,8 @@ QVariant ModelItem::data(int role) const
         case StageNode::ActorType:
             return static_cast<const Actor*>(d.node)->name;
         }
+    } else if (role == StageNodeRole) {
+        return qVariantFromValue<StageNode*>(d.node);
     }
     return QStandardItem::data(role);
 }
