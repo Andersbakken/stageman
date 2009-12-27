@@ -445,3 +445,12 @@ void StageModel::setCurrentItem(QStandardItem *standardItem)
 {
     // change columns based on what is current
 }
+
+QString Frame::text() const
+{
+    if (act) {
+        return QString("%1. frame %1/%2").arg(act->frames.indexOf(const_cast<Frame*>(this))).arg(seconds).arg(startTime);
+    }
+    return QString();
+}
+

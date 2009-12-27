@@ -24,6 +24,9 @@ Window::Window(QWidget *parent)
     d.treeView->setModel(d.model);
     connect(d.treeView->selectionModel(), SIGNAL(currentChanged(QModelIndex,QModelIndex)),
             this, SLOT(onCurrentChanged(QModelIndex)));
+    connect(d.stageView->stageScene(), SIGNAL(statusChanged(QString)),
+            statusBar(), SLOT(showMessage(QString)));
+
 //    d.verticalSplitter->setModel(d.model);
 }
 
@@ -41,8 +44,8 @@ void Window::onCurrentChanged(const QModelIndex &idx)
     if (StageNode *node = qVariantValue<StageNode*>(idx.data(ModelItem::StageNodeRole))) {
         if (Act *act = stageModelNodeCast<Act*>(node)) {
             d.stageView->stageScene()->setAct(act);
-        } else if (Frame *frame = stageModelNodeCast<Frame*>(node)) {
-            d.stageView->stageScene()->setCurrentFrame(frame);
+//         } else if (Frame *frame = stageModelNodeCast<Frame*>(node)) {
+//             d.stageView->stageScene()->setCurrentFrame(frame);
         }
     }
 }

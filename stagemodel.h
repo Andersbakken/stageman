@@ -17,6 +17,7 @@ struct StageNode
     };
     virtual ~StageNode() {}
     virtual NodeType type() const = 0;
+    virtual QString text() const { return QString(); }
     QHash<QString, QVariant> notes;
     QRectF rect; // ### ugly
 };
@@ -45,6 +46,9 @@ struct Play : public StageNode
     QList<Act*> acts;
     QList<Actor*> actors;
 
+
+    virtual QString text() const { return name; }
+
     void save(QIODevice *device) const;
     static Play *load(QIODevice *device);
     static Play *createRandomPlay();
@@ -61,6 +65,8 @@ struct Act : public StageNode
     ~Act();
     Play *play;
     QString name;
+    virtual QString text() const { return name; }
+
     QList<Frame*> frames;
 
     QSet<Role*> rolesInAct() const;
@@ -78,6 +84,8 @@ struct Frame : public StageNode
     ~Frame();
     Act *act;
     int seconds, startTime; // ### should I store start-time or calculate?
+    virtual QString text() const;
+
     QList<Event*> events;
 };
 

@@ -45,6 +45,7 @@ void StageScene::setAct(Act *act)
                 StageGraphicsItem *item = d.roles.value(event->role);
                 if (!item) {
                     item = new StageGraphicsItem(event->role);
+                    connect(item, SIGNAL(statusChanged(QString)), this, SIGNAL(statusChanged(QString)));
                     item->resize(100, 100);
                     addItem(item);
                     d.roles[event->role] = item;
@@ -52,7 +53,7 @@ void StageScene::setAct(Act *act)
 //                frameState->assignProperty(item, "opacity",  // need a way to hide all items initially in each frame
 
                 frameState->assignProperty(item, "pos", event->position);
-                frameState->assignProperty(item, "rotation", event->angle);
+                frameState->assignProperty(item, "angle", event->angle);
                 Q_ASSERT(!transitionNext == !transitionPrevious);
                 if (transitionNext) {
                     transitionNext->addAnimation(item->animation());
@@ -101,10 +102,11 @@ void StageScene::keyPressEvent(QKeyEvent *event)
 
 StageGraphicsItem::StageGraphicsItem(StageNode *node)
 {
+    d.state = Data::Normal;
     d.node = node;
     QParallelAnimationGroup *group = new QParallelAnimationGroup(this);
     group->addAnimation(new QPropertyAnimation(this, "pos"));
-    group->addAnimation(new QPropertyAnimation(this, "rotation"));
+    group->addAnimation(new QPropertyAnimation(this, "angle"));
     d.animation = group;
 }
 
@@ -118,7 +120,23 @@ void StageGraphicsItem::paint(QPainter *painter, const QStyleOptionGraphicsItem 
             pixmap.setMask(pixmap.createHeuristicMask());
         }
         painter->drawPixmap(option->rect, pixmap);
+        painter->setPen(Qt::black);
         painter->drawText(option->rect, Qt::AlignCenter, static_cast<Role*>(d.node)->character->name);
+#if 0
+        QString text;
+        switch (d.state) {
+        case Data::Rotating: text = QString("%1%2").arg(rotation()).arg(QChar(0x00B0)); break;
+        case Data::Moving: text = QString("%1 %2").arg(x()).arg(y()); break;
+        case Data::Normal:
+            break;
+        }
+        if (!text.isEmpty()) {
+            const QRect r = painter->fontMetrics().boundingRect(text);
+            painter->fillRect(r, Qt::black);
+            painter->setPen(Qt::white);
+            painter->drawText(option->rect, Qt::AlignLeft|Qt::AlignTop, text);
+        }
+#endif
         break;
     }
     case StageNode::ObjectType:
@@ -135,19 +153,95 @@ QAbstractAnimation *StageGraphicsItem::animation() const
     return d.animation;
 }
 
+#if 0
 void StageScene::setCurrentFrame(Frame *frame)
 {
     setAct(0);
     clear();
     foreach(Event *event, frame->events) {
         StageGraphicsItem *item = new StageGraphicsItem(event->role);
-        item->setRotation(event->angle);
+        item->setAngle(event->angle);
         item->setPos(event->position);
         addItem(item);
     }
 }
+#endif
 void StageScene::onSceneRectChanged(const QRectF &r)
 {
     if (d.textItem)
         d.textItem->setPos(r.topLeft());
+}
+
+StageScene * StageGraphicsItem::stageScene() const
+{
+    return qobject_cast<StageScene*>(scene());
+}
+
+void StageGraphicsItem::mousePressEvent(QGraphicsSceneMouseEvent *event)
+{
+    event->accept();
+    switch (event->button()) {
+    case Qt::MidButton:
+    case Qt::LeftButton:
+        d.grab = event->scenePos() - pos();
+        d.state = (event->button() == Qt::LeftButton ? Data::Moving : Data::Rotating);
+        break;
+    default:
+        event->ignore();
+        break;
+    }
+}
+
+void StageGraphicsItem::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
+{
+    switch (d.state) {
+    case Data::Moving:
+        setPos(event->scenePos() - d.grab);
+        emit statusChanged(QString("%0 - %1 %2").arg(d.node->text()).arg(x()).arg(y()));
+        break;
+    case Data::Rotating:
+        setAngle(QLineF(d.grab + pos(), event->scenePos()).angle());
+        setAngleItem(QLineF(d.grab, event->scenePos()));
+        emit statusChanged(QString("%0 - %1 %2").arg(d.node->text()).arg(rotation()).arg(QChar(0x00B0))); break; // don't need to use arg for degrees sign really
+        break;
+    case Data::Normal:
+        break;
+    }
+}
+
+void StageGraphicsItem::mouseReleaseEvent(QGraphicsSceneMouseEvent *)
+{
+    d.state = Data::Normal;
+    setAngleItem(QLineF());
+}
+
+qreal StageGraphicsItem::angle() const
+{
+    return d.angle;
+}
+
+void StageGraphicsItem::setAngle(qreal angle)
+{
+    d.angle = angle;
+    QTransform transform;
+    const QPointF center = rect().center();
+    transform.translate(center.x(), center.y());
+    transform.rotate(angle);
+    transform.translate(-center.x(), -center.y());
+    setTransform(transform);
+}
+
+void StageGraphicsItem::setAngleItem(const QLineF &line)
+{
+    static QWeakPointer<LineItem> item;
+    if (line.isNull()) {
+        delete item.data();
+        return;
+    }
+    if (!item) {
+        item = new LineItem;
+        item.data()->setZValue(10);
+        scene()->addItem(item.data());
+    }
+    item.data()->setLine(line);
 }

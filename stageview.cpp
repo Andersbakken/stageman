@@ -14,6 +14,6 @@ StageView::StageView(QWidget *parent)
 
 void StageView::resizeEvent(QResizeEvent *e)
 {
-    fitInView(rect(), Qt::KeepAspectRatio);
+    fitInView(sceneRect(), Qt::KeepAspectRatio);
     QGraphicsView::resizeEvent(e);
 }
