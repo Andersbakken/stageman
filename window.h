@@ -18,8 +18,6 @@ private:
     struct Data {
         StageView *stageView;
         QSplitter *splitter;
-        QSplitter *verticalSplitter;
-        QTableView *objectTable, *sceneTable;
         QTreeView *treeView;
         Play *play;
         StageModel *model;
