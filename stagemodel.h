@@ -188,7 +188,7 @@ class ModelItem : public QStandardItem
 public:
     ModelItem(StageNode *node)
     {
-        setFlags(Qt::ItemIsSelectable|Qt::ItemIsEnabled|Qt::ItemIsDragEnabled|Qt::ItemIsDropEnabled);
+//        setFlags(Qt::ItemIsSelectable|Qt::ItemIsEnabled|Qt::ItemIsDragEnabled|Qt::ItemIsDropEnabled);
         d.node = node;
     }
 
@@ -212,9 +212,11 @@ public:
     Play *play() const;
     void refresh();
     void setCurrentItem(QStandardItem *standardItem);
+    QStandardItem *actsRoot() const;
 private:
     struct Data {
         Play *play;
+        QStandardItem *actsRoot;
     } d;
 };
 

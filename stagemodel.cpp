@@ -353,6 +353,7 @@ StageModel::StageModel(QObject *parent)
 {
     setColumnCount(4);
     d.play = 0;
+    d.actsRoot = 0;
 }
 
 void StageModel::setPlay(Play *play)
@@ -369,6 +370,7 @@ Play * StageModel::play() const
 void StageModel::refresh()
 {
     invisibleRootItem()->removeRows(0, invisibleRootItem()->rowCount());
+    d.actsRoot = 0;
     if (d.play) {
         ModelItem *root = new ModelItem(d.play);
         setItem(0, 0, root);
@@ -391,6 +393,7 @@ void StageModel::refresh()
         }
 
         QStandardItem *acts = new QStandardItem("Acts");
+        d.actsRoot = acts;
         root->setChild(3, 0, acts);
         for (int i=0; i<d.play->acts.size(); ++i) {
             Act *a = d.play->acts.at(i);
@@ -454,3 +457,7 @@ QString Frame::text() const
     return QString();
 }
 
+QStandardItem * StageModel::actsRoot() const
+{
+    return d.actsRoot;
+}

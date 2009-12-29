@@ -15,6 +15,9 @@ public:
 public slots:
     void onTreeViewCurrentChanged(const QModelIndex &idx);
     void onComboBoxCurrentChanged(int current);
+    void save();
+    void load();
+    void saveAs();
 private:
     enum { Scenes, Acts, Roles };
     struct Data {
@@ -22,6 +25,7 @@ private:
         StageView *stageView;
         QSplitter *splitter;
         QTreeView *treeView;
+        QTableView *actsTable;
         Play *play;
         StageModel *model;
         QStackedWidget *widgetStack;
