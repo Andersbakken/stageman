@@ -306,44 +306,48 @@ Frame::~Frame()
 
 QVariant ModelItem::data(int role) const
 {
-    if (d.node && role == Qt::DisplayRole) {
-        switch (d.node->type()) {
-        case StageNode::ObjectType:
-            return static_cast<Object*>(d.node)->name;
-        case StageNode::PlayType:
-            return static_cast<Play*>(d.node)->name;
-        case StageNode::ActType:
-            return static_cast<Act*>(d.node)->name;
-        case StageNode::FrameType:
-            switch (column()) {
-            case 0: return static_cast<const Frame*>(d.node)->seconds;
-            case 1: return static_cast<const Frame*>(d.node)->startTime;
+    if (d.node) {
+        if (role == Qt::DisplayRole) {
+            switch (d.node->type()) {
+            case StageNode::ObjectType:
+                return static_cast<Object*>(d.node)->name;
+            case StageNode::PlayType:
+                return static_cast<Play*>(d.node)->name;
+            case StageNode::ActType:
+                return static_cast<Act*>(d.node)->name;
+            case StageNode::FrameType:
+                switch (column()) {
+                case 0: return static_cast<const Frame*>(d.node)->seconds;
+                case 1: return static_cast<const Frame*>(d.node)->startTime;
+                }
+                break;
+            case StageNode::EventType:
+                switch (column()) {
+                case 0: return static_cast<const Event*>(d.node)->role->character->name;
+                case 1: return static_cast<const Event*>(d.node)->role->actor->name;
+                case 2: return QString("%1 %2").
+                        arg(static_cast<const Event*>(d.node)->position.x()).
+                        arg(static_cast<const Event*>(d.node)->position.y());
+                case 3: return QString("%1%2").arg(static_cast<const Event*>(d.node)->angle).
+                        arg(QChar(0x00B0));
+                }
+                break;
+            case StageNode::RoleType:
+                switch (column()) {
+                case 0: return static_cast<const Role*>(d.node)->character->name;
+                case 1: return static_cast<const Role*>(d.node)->actor->name;
+                }
+                break;
+            case StageNode::CharacterType:
+                return static_cast<const Character*>(d.node)->name;
+            case StageNode::ActorType:
+                return static_cast<const Actor*>(d.node)->name;
             }
-            break;
-        case StageNode::EventType:
-            switch (column()) {
-            case 0: return static_cast<const Event*>(d.node)->role->character->name;
-            case 1: return static_cast<const Event*>(d.node)->role->actor->name;
-            case 2: return QString("%1 %2").
-                    arg(static_cast<const Event*>(d.node)->position.x()).
-                    arg(static_cast<const Event*>(d.node)->position.y());
-            case 3: return QString("%1%2").arg(static_cast<const Event*>(d.node)->angle).
-                    arg(QChar(0x00B0));
-            }
-            break;
-        case StageNode::RoleType:
-            switch (column()) {
-            case 0: return static_cast<const Role*>(d.node)->character->name;
-            case 1: return static_cast<const Role*>(d.node)->actor->name;
-            }
-            break;
-        case StageNode::CharacterType:
-            return static_cast<const Character*>(d.node)->name;
-        case StageNode::ActorType:
-            return static_cast<const Actor*>(d.node)->name;
+        } else if (role == StageNodeRole) {
+            return qVariantFromValue<StageNode*>(d.node);
+        } else if (role == NotesRole) {
+            return d.node->notes;
         }
-    } else if (role == StageNodeRole) {
-        return qVariantFromValue<StageNode*>(d.node);
     }
     return QStandardItem::data(role);
 }

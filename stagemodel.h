@@ -18,7 +18,7 @@ struct StageNode
     virtual ~StageNode() {}
     virtual NodeType type() const = 0;
     virtual QString text() const { return QString(); }
-    QHash<QString, QVariant> notes;
+    QString notes;
     QRectF rect; // ### ugly
 };
 
@@ -193,7 +193,7 @@ public:
     }
 
     QVariant data(int role = Qt::UserRole + 1) const;
-    enum { StageNodeRole = Qt::UserRole + 2 };
+    enum { StageNodeRole = Qt::UserRole + 2, NotesRole };
     StageNode *node() const {
         return d.node;
     }

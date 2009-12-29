@@ -8,13 +8,19 @@ DEPENDPATH += .
 INCLUDEPATH += .
 
 # Input
-HEADERS += stagemodel.h stageobject.h stagescene.h stageview.h window.h
+HEADERS += stagemodel.h \
+           stageobject.h \
+           stagescene.h \
+           stageview.h \
+           window.h \
+           acteditor.h
 SOURCES += main.cpp \
            stagemodel.cpp \
            stageobject.cpp \
            stagescene.cpp \
            stageview.cpp \
-           window.cpp
+           window.cpp \
+           acteditor.cpp
 CONFIG += debug
 unix {
     MOC_DIR=.moc
