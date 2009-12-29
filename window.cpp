@@ -17,7 +17,7 @@ Window::Window(QWidget *parent)
     d.model->setPlay(d.play);
     d.treeView->setModel(d.model);
     connect(d.treeView->selectionModel(), SIGNAL(currentChanged(QModelIndex,QModelIndex)),
-            this, SLOT(onCurrentChanged(QModelIndex)));
+            this, SLOT(onTreeViewCurrentChanged(QModelIndex)));
     connect(d.stageView->stageScene(), SIGNAL(statusChanged(QString)),
             statusBar(), SLOT(showMessage(QString)));
 
@@ -31,7 +31,7 @@ void Window::closeEvent(QCloseEvent *e)
     QMainWindow::closeEvent(e);
 }
 
-void Window::onCurrentChanged(const QModelIndex &idx)
+void Window::onTreeViewCurrentChanged(const QModelIndex &idx)
 {
     if (StageNode *node = qVariantValue<StageNode*>(idx.data(ModelItem::StageNodeRole))) {
         if (Act *act = stageModelNodeCast<Act*>(node)) {
