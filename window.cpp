@@ -6,9 +6,14 @@
 Window::Window(QWidget *parent)
     : QMainWindow(parent)
 {
-    setCentralWidget(d.splitter = new QSplitter(Qt::Horizontal));
+    QWidget *w = new QWidget(this);
+    QVBoxLayout *l = new QVBoxLayout(w);
+    l->addWidget(d.cmbView = new QComboBox, 0, Qt::AlignLeft);
+    l->addWidget(d.splitter = new QSplitter(Qt::Horizontal));
     d.splitter->addWidget(d.treeView = new QTreeView);
-    d.splitter->addWidget(d.stageView = new StageView);
+    d.splitter->addWidget(d.widgetStack = new QStackedWidget);
+    d.widgetStack->insertWidget(Scenes, d.stageView = new StageView);
+    setCentralWidget(w);
     QSettings settings;
     restoreGeometry(settings.value("geometry").toByteArray());
     d.splitter->restoreState(settings.value("splitter").toByteArray());
@@ -40,4 +45,9 @@ void Window::onTreeViewCurrentChanged(const QModelIndex &idx)
 //             d.stageView->stageScene()->setCurrentFrame(frame);
         }
     }
+}
+
+void Window::onComboBoxCurrentChanged(int current)
+{
+    d.widgetStack->setCurrentIndex(current);
 }
